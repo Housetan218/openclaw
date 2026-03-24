@@ -423,6 +423,7 @@ export async function runPreparedReply(
   let prefixedCommandBody = mediaNote
     ? [mediaNote, mediaReplyHint, prefixedBody ?? ""].filter(Boolean).join("\n").trim()
     : prefixedBody;
+  let mem0InjectedText: string | undefined;
   const mem0Query = rawBodyTrimmed || baseBodyTrimmedRaw || prefixedCommandBody.trim();
   if (mem0Query) {
     const mem0Recall = await recallAndBuildInjectText({
@@ -432,8 +433,12 @@ export async function runPreparedReply(
       runId: opts?.runId ?? sessionKey ?? undefined,
     });
     if (mem0Recall?.injectedText) {
-      prefixedCommandBody = `${prefixedCommandBody}\n\n${mem0Recall.injectedText}`;
+      mem0InjectedText = mem0Recall.injectedText;
     }
+  }
+  if (mem0InjectedText) {
+    // Keep recall context in system prompt to avoid persisting it as user text in session history.
+    extraSystemPromptParts.push(mem0InjectedText);
   }
   if (!resolvedThinkLevel) {
     resolvedThinkLevel = await modelState.resolveDefaultThinkingLevel();
