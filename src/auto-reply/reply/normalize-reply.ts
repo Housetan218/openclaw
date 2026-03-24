@@ -13,7 +13,7 @@ import {
   resolveResponsePrefixTemplate,
   type ResponsePrefixContext,
 } from "./response-prefix-template.js";
-import { hasSlackDirectives, parseSlackDirectives } from "./slack-directives.js";
+import { compileSlackInteractiveReplies } from "./slack-directives.js";
 
 export type NormalizeReplySkipReason = "empty" | "silent" | "heartbeat";
 
@@ -115,8 +115,8 @@ export function normalizeReplyPayload(
   }
 
   enrichedPayload = { ...enrichedPayload, text };
-  if (opts.enableSlackInteractiveReplies && text && hasSlackDirectives(text)) {
-    enrichedPayload = parseSlackDirectives(enrichedPayload);
+  if (opts.enableSlackInteractiveReplies && text) {
+    enrichedPayload = compileSlackInteractiveReplies(enrichedPayload);
   }
 
   return enrichedPayload;
